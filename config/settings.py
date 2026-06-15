@@ -26,8 +26,9 @@ except ImportError:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 IS_RENDER = os.getenv("RENDER", "").strip().lower() == "true"
+IS_MANAGED_RUNTIME = IS_RENDER or bool(os.getenv("PORT"))
 
-if load_dotenv and not IS_RENDER and (BASE_DIR / ".env").exists():
+if load_dotenv and not IS_MANAGED_RUNTIME and (BASE_DIR / ".env").exists():
     load_dotenv(BASE_DIR / ".env")
 
 
@@ -133,6 +134,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 DB_SSL_REQUIRE = env_bool("DB_SSL_REQUIRE", default=not DEBUG)
+
+if IS_MANAGED_RUNTIME and DATABASE_URL and "@db:" in DATABASE_URL:
+    raise ImproperlyConfigured(
+        "DATABASE_URL points to Docker host 'db'. Set DATABASE_URL to your managed Postgres URL."
+    )
 
 if DATABASE_URL:
     DATABASES = {
