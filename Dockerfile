@@ -25,4 +25,4 @@ RUN chown -R appuser:appuser /app
 # Entrypoint runs as root to chown mounted volumes, then gosu → appuser.
 USER root
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:${PORT:-8000}"]

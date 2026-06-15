@@ -25,7 +25,9 @@ except ImportError:
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if load_dotenv and (BASE_DIR / ".env").exists():
+IS_RENDER = os.getenv("RENDER", "").strip().lower() == "true"
+
+if load_dotenv and not IS_RENDER and (BASE_DIR / ".env").exists():
     load_dotenv(BASE_DIR / ".env")
 
 
