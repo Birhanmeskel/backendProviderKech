@@ -173,13 +173,21 @@ if any(arg == "test" for arg in sys.argv):
         }
     }
 else:
-    _redis_cache_url = os.getenv("REDIS_CACHE_URL", "redis://127.0.0.1:6379/2")
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.redis.RedisCache",
-            "LOCATION": _redis_cache_url,
+    _redis_cache_url = (os.getenv("REDIS_CACHE_URL") or "").strip()
+    if _redis_cache_url:
+        CACHES = {
+            "default": {
+                "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                "LOCATION": _redis_cache_url,
+            }
         }
-    }
+    else:
+        # Fallback avoids 500s on throttled endpoints when Redis is not provisioned.
+        CACHES = {
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            }
+        }
 
 
 # Password validation
