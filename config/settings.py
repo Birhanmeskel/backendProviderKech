@@ -238,12 +238,22 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "core.User"
 
 # CORS (Next.js dashboard + mobile web; architecture: explicit origins in production)
+def _ensure_scheme(origin: str) -> str:
+    """Add http:// or https:// scheme if missing."""
+    origin = origin.strip()
+    if not origin:
+        return origin
+    if origin.startswith(("http://", "https://")):
+        return origin
+    return f"https://{origin}" if not DEBUG else f"http://{origin}"
+
 _cors_raw = os.getenv("CORS_ALLOWED_ORIGINS", "")
-CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors_raw.split(",") if origin.strip()]
+CORS_ALLOWED_ORIGINS = [_ensure_scheme(o) for o in _cors_raw.split(",") if o.strip()]
 if DEBUG and not CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS = [
         "http://127.0.0.1:3000",
         "http://localhost:3000",
+        "https://backendproviderkech.onrender.com"
     ]
 
 CORS_ALLOW_CREDENTIALS = env_bool("CORS_ALLOW_CREDENTIALS", default=True)
